@@ -23,6 +23,15 @@ import '../../presentation/blocs/auth/auth_bloc.dart';
 import '../../presentation/blocs/gym/gym_bloc.dart';
 import '../../presentation/blocs/saved_gyms/saved_gyms_cubit.dart';
 import '../../presentation/blocs/settings/settings_cubit.dart';
+import '../../data/datasources/remote/admin_remote_datasource.dart';
+import '../../data/repositories/admin_repository_impl.dart';
+import '../../domain/repositories/admin_repository.dart';
+import '../../domain/usecases/admin/get_admin_stats_usecase.dart';
+import '../../domain/usecases/admin/get_pending_gyms_usecase.dart';
+import '../../domain/usecases/admin/get_users_usecase.dart';
+import '../../domain/usecases/admin/update_user_role_usecase.dart';
+import '../../domain/usecases/admin/approve_gym_usecase.dart';
+import '../../domain/usecases/admin/reject_gym_usecase.dart';
 import '../../presentation/blocs/theme/theme_cubit.dart';
 
 /// Global [GetIt] service locator instance.
@@ -59,23 +68,22 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<FirestoreGymDataSource>(
     () => FirestoreGymDataSource(sl()),
   );
-  sl.registerLazySingleton<CloudinaryDataSource>(
-    () => CloudinaryDataSource(),
-  );
+  sl.registerLazySingleton<CloudinaryDataSource>(() => CloudinaryDataSource());
   sl.registerLazySingleton<FirestoreUserDataSource>(
     () => FirestoreUserDataSource(sl()),
   );
 
+  sl.registerLazySingleton<AdminRemoteDataSource>(
+    () => AdminRemoteDataSource(sl()),
+  );
+
   // ── 3. Repositories ───────────────────────────────────────────────────────
-  sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(sl()),
-  );
-  sl.registerLazySingleton<GymRepository>(
-    () => GymRepositoryImpl(sl()),
-  );
-  sl.registerLazySingleton<UserRepository>(
-    () => UserRepositoryImpl(sl()),
-  );
+  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
+
+  sl.registerLazySingleton<AdminRepository>(() => AdminRepositoryImpl(sl()));
+
+  sl.registerLazySingleton<GymRepository>(() => GymRepositoryImpl(sl()));
+  sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(sl()));
 
   // ── 4. Use-cases ──────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => SignInUseCase(sl()));
@@ -83,7 +91,14 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GoogleSignInUseCase(sl()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
+  sl.registerLazySingleton(() => GetAdminStatsUseCase(sl<AdminRepository>()));
+  sl.registerLazySingleton(() => GetUsersUseCase(sl<AdminRepository>()));
+  sl.registerLazySingleton(() => GetPendingGymsUseCase(sl<AdminRepository>()));
+  sl.registerLazySingleton(() => UpdateUserRoleUseCase(sl<AdminRepository>()));
+  sl.registerLazySingleton(() => ApproveGymUseCase(sl<AdminRepository>()));
+  sl.registerLazySingleton(() => RejectGymUseCase(sl<AdminRepository>()));
   sl.registerLazySingleton(() => GetGymsStreamUseCase(sl()));
+
   sl.registerLazySingleton(() => FilterGymsByDistrictUseCase());
   sl.registerLazySingleton(() => CreateGymUseCase(sl()));
   sl.registerLazySingleton(() => UpdateGymUseCase(sl()));
@@ -115,10 +130,6 @@ Future<void> initDependencies() async {
     ),
   );
   sl.registerFactory<SavedGymsCubit>(
-    () => SavedGymsCubit(
-      saveGym: sl(),
-      unsaveGym: sl(),
-      userRepository: sl(),
-    ),
+    () => SavedGymsCubit(saveGym: sl(), unsaveGym: sl(), userRepository: sl()),
   );
 }

@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-/// Domain-level gym entity. Implemented by Person 3 (Gym Feed & Detail).
+/// Pure-Dart representation of a gym.
+enum GymStatus { pending, approved, rejected }
+
+/// Domain-level gym entity. Implemented by Person 3 (Gym Feed &amp; Detail).
 class GymEntity extends Equatable {
   const GymEntity({
     required this.id,
@@ -11,6 +14,7 @@ class GymEntity extends Equatable {
     required this.amenities,
     this.thumbnailUrl,
     this.galleryUrls = const [],
+    this.status = GymStatus.pending,
   });
 
   final String id;
@@ -21,16 +25,18 @@ class GymEntity extends Equatable {
   final List<String> amenities;
   final String? thumbnailUrl;
   final List<String> galleryUrls;
+  final GymStatus status;
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        description,
-        district,
-        subscriptionPrice,
-        amenities,
-        thumbnailUrl,
-        galleryUrls,
-      ];
+    id,
+    name,
+    description,
+    district,
+    subscriptionPrice,
+    amenities,
+    thumbnailUrl,
+    galleryUrls,
+    status,
+  ];
 }
